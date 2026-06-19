@@ -30,6 +30,16 @@ export const image = (() => {
     });
 
     /**
+     * @param {HTMLImageElement} el
+     * @returns {void}
+     */
+    const skipImage = (el) => {
+        console.warn('Skipping failed image:', el.getAttribute('data-src') ?? el.src);
+        el.classList.remove('opacity-0');
+        progress.complete('image', true);
+    };
+
+    /**
      * @param {HTMLImageElement} el 
      * @param {string} src 
      * @returns {Promise<void>}
@@ -54,7 +64,7 @@ export const image = (() => {
             res: (url) => appendImage(el, url),
             rej: (err) => {
                 console.error(err);
-                progress.invalid('image');
+                skipImage(el);
             },
         });
     };
@@ -64,7 +74,7 @@ export const image = (() => {
      * @returns {void}
      */
     const getByDefault = (el) => {
-        el.onerror = () => progress.invalid('image');
+        el.onerror = () => skipImage(el);
         el.onload = () => {
             el.width = el.naturalWidth;
             el.height = el.naturalHeight;
@@ -74,7 +84,7 @@ export const image = (() => {
         if (el.complete && el.naturalWidth !== 0 && el.naturalHeight !== 0) {
             progress.complete('image');
         } else if (el.complete) {
-            progress.invalid('image');
+            skipImage(el);
         }
     };
 
